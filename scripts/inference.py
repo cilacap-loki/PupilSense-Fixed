@@ -7,6 +7,7 @@ from detectron2.utils.visualizer import Visualizer
 import pandas as pd
 from dotenv import load_dotenv
 import logging
+from pathlib import Path
 
 
 # Check if CUDA is available
