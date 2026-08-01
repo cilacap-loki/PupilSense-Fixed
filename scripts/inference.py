@@ -63,7 +63,7 @@ class Inference:
         # cfg now already contains everything we've set previously. We changed it a little bit for inference:
         cfg.MODEL.WEIGHTS = os.path.join(model_path, "model_final.pth")  # path to the model we just trained
         cfg.MODEL.DEVICE = device #configuring the device for inference
-        cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.9   # set a custom testing threshold
+        cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.4   # Lowered from 0.9 for better sensitivity on overexposed/varied lighting images
 
         return DefaultPredictor(cfg)
 
