@@ -142,9 +142,6 @@ class Inference:
         pupil_instances = 0
 
         for image in os.listdir(self.image_dir):
-            
-            iris_flag = False
-            pupil_flag = False
             image_name = os.path.join(self.image_dir, image)
 
             image_type = None
@@ -153,7 +150,6 @@ class Inference:
 
             if image_type is None:
                 total_images -= 1
-                print(f"{image} is not an image file. Skipping...")
                 continue
 
             try:
@@ -169,43 +165,53 @@ class Inference:
             if save_images:
                 self.infer_image_display(output, image)
 
-            
             print(f'Prediction done on Image: {image}')
             instances = output["instances"]
 
             bbox_l = instances.pred_boxes.tensor.cpu().numpy()
             total_instances += len(bbox_l)
+            
+            r_pupil, x_pupil, y_pupil = np.nan, np.nan, np.nan
+            r_iris, x_iris, y_iris = np.nan, np.nan, np.nan
+            
             if len(bbox_l) != 0:
-                classes = instances.pred_classes
-                scores = instances.scores
+                classes = instances.pred_classes.cpu().numpy()
+                scores = instances.scores.cpu().numpy()
 
-                # Create a list of tuples with (index, score) for each instance
                 instances_with_scores = [(i, score) for i, score in enumerate(scores)]
-
-                # Sort the instances based on the scores
                 instances_with_scores.sort(key=lambda x: x[1], reverse=True)
-                for index, score in instances_with_scores:
-                    if classes[index] == 1 and not iris_flag:
-                        iris_flag = True
-                        pupil_instances += 1
-                        pupil = bbox_l[index]
-                        pupil_info = get_center_and_radius(pupil)
-                        info["radiusPupil"].append(pupil_info["radius"])
-                        info["xCenterPupil"].append(int(pupil_info["xCenter"]))
-                        info["yCenterPupil"].append(int(pupil_info["yCenter"]))
-                    elif classes[index] == 0 and not pupil_flag:
-                        pupil_flag = True
-                        iris_instances += 1
-                        iris = bbox_l[index]
-                        iris_info = get_center_and_radius(iris)
-                        info["radiusIris"].append(iris_info["radius"])
-                        info["xCenterIris"].append(int(iris_info["xCenter"]))
-                        info["yCenterIris"].append(int(iris_info["yCenter"]))
-                        info["imageName"].append(image)
+                
+                pupil_done = False
+                iris_done = False
 
-                    if iris_flag and pupil_flag:
-                        
+                for index, score in instances_with_scores:
+                    cls_id = classes[index]
+                    # Class 1 = Pupil, Class 0 = Iris
+                    if cls_id == 1 and not pupil_done:
+                        pupil_done = True
+                        pupil_instances += 1
+                        pupil_info = get_center_and_radius(bbox_l[index])
+                        r_pupil = pupil_info["radius"]
+                        x_pupil = int(pupil_info["xCenter"])
+                        y_pupil = int(pupil_info["yCenter"])
+                    elif cls_id == 0 and not iris_done:
+                        iris_done = True
+                        iris_instances += 1
+                        iris_info = get_center_and_radius(bbox_l[index])
+                        r_iris = iris_info["radius"]
+                        x_iris = int(iris_info["xCenter"])
+                        y_iris = int(iris_info["yCenter"])
+
+                    if pupil_done and iris_done:
                         break
+
+            info["imageName"].append(image)
+            info["radiusPupil"].append(r_pupil)
+            info["xCenterPupil"].append(x_pupil)
+            info["yCenterPupil"].append(y_pupil)
+            info["radiusIris"].append(r_iris)
+            info["xCenterIris"].append(x_iris)
+            info["yCenterIris"].append(y_iris)
 
         df = pd.DataFrame(info)
         iris_radius = df["radiusIris"].mean()
