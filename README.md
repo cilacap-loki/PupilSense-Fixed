@@ -18,19 +18,24 @@ The accompanying data collection app will be released soon for the research comm
 <img width="1750" alt="Pupil-to-Iris Ratio (PIR) Estimation Pipeline" src="https://github.com/stevenshci/PupilSense/blob/main/static/PupilSense.png">
 
 
-## Installation
+## Installation & Quickstart (Google Colab / Local)
 
-Follow these steps to set up the project:
+### 🚀 Google Colab (Recommended)
+Run the following commands in a Colab notebook cell:
+```bash
+!git clone https://github.com/<YOUR_USERNAME>/PupilSense.git
+%cd PupilSense
+!pip install -r requirements.txt
+!bash setup.sh
+```
+
+### 💻 Local Setup
+Follow these steps to set up the project locally:
 
     (1) Clone the repository: git clone https://github.com/stevenshci/PupilSense.git
     (2) Navigate to the project directory: cd PupilSense
     (3) Install the required packages: pip install -r requirements.txt
-
-### Setup
-
-After you install the required packages, you can just run the `setup.sh` script to set up the project environment:
-    
-    source setup.sh
+    (4) Run setup script: bash setup.sh
 
 ### Dataset
 

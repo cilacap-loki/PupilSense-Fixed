@@ -7,9 +7,7 @@ from detectron2.utils.visualizer import Visualizer
 import pandas as pd
 from dotenv import load_dotenv
 import logging
-from pathlib import Path
-import imghdr
-from finetune import Finetune
+
 
 # Check if CUDA is available
 cuda_available = torch.cuda.is_available()
@@ -148,7 +146,10 @@ class Inference:
             pupil_flag = False
             image_name = os.path.join(self.image_dir, image)
 
-            image_type = imghdr.what(image_name)
+            image_type = None
+            if image_name.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.tiff')):
+                image_type = "image"
+
             if image_type is None:
                 total_images -= 1
                 print(f"{image} is not an image file. Skipping...")

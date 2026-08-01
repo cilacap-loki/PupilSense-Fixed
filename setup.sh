@@ -1,21 +1,18 @@
 #!/bin/bash
 
-# Define the URL of the zip file
-URL="https://storage.googleapis.com/stevenshci-public/PupilSense/models.zip"
+# Define the URL of the zip file (GitHub Releases)
+URL="https://github.com/stevenshci/PupilSense/releases/download/v1.0/models.zip"
 
-echo "Downloading model..."
-# Use curl to download the zip file
-curl -o models.zip $URL
+echo "Downloading model from GitHub Releases..."
+wget -O models.zip $URL || curl -L -o models.zip $URL
 
 echo "Extracting files..."
-# Unzip the file in the present working directory
-unzip models.zip
+unzip -o models.zip
 
 echo "Cleanup downloaded zip file..."
-# Remove the zip file after extraction
-rm models.zip
+rm -f models.zip
 
-python3 -m pip install pyyaml==5.1
+python3 -m pip install pyyaml setuptools
 
 # Copy example.env to .env if it doesn't already exist
 if [ ! -f .env ]; then
@@ -25,15 +22,11 @@ else
     echo ".env file already exists. Please ensure it has the correct settings."
 fi
 
-# Clone Detectron2 repository
-git clone https://github.com/facebookresearch/detectron2
-
-# Add detectron2 to Python path
-PYTHON_PATH=$(python3 -c "import os; print(os.path.abspath('./detectron2'))")
-echo "export PYTHONPATH=\$PYTHONPATH:$PYTHON_PATH" >> ~/.bashrc
-
-# Apply changes to current session
-export PYTHONPATH=$PYTHONPATH:$PYTHON_PATH
+# Clone & Install Detectron2
+if [ ! -d "detectron2" ]; then
+    git clone https://github.com/facebookresearch/detectron2.git
+fi
+python3 -m pip install -e detectron2
 
 echo "Setup completed successfully."
 
